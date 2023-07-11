@@ -1,9 +1,5 @@
 import { react, Signal, atom, RESET_VALUE } from 'signia';
-import {
-  AttrSignals,
-  CustomElementManifest,
-  isCustomElementManifest,
-} from './define.js';
+import { AttrSignals } from './define.js';
 
 export type DomSignal<
   T extends HTMLElement | DocumentFragment = HTMLElement | DocumentFragment,
@@ -18,17 +14,10 @@ type FromNameOrInit<T> = T extends TagName
   ? T
   : T extends DocumentFragment
   ? T
-  : T extends CustomElementManifest<any, infer U>
-  ? HTMLElement & { attrs: AttrSignals<U> }
   : HTMLElement;
 
 export const element = <
-  T extends
-    | TagName
-    | HTMLElement
-    | DocumentFragment
-    | CustomTagName
-    | CustomElementManifest<CustomTagName, any>,
+  T extends TagName | HTMLElement | DocumentFragment | CustomTagName,
 >(
   tagNameOrValue: T,
 ): DomSignal<FromNameOrInit<T>> => {
@@ -37,15 +26,11 @@ export const element = <
       ? tagNameOrValue
       : tagNameOrValue instanceof HTMLElement
       ? tagNameOrValue.tagName.toLowerCase()
-      : isCustomElementManifest(tagNameOrValue)
-      ? tagNameOrValue.name
       : 'fragment';
   const instance = atom(
     name,
     typeof tagNameOrValue === 'string'
       ? (document.createElement(tagNameOrValue) as T)
-      : isCustomElementManifest(tagNameOrValue)
-      ? (document.createElement(tagNameOrValue.name) as T)
       : tagNameOrValue,
     {
       historyLength: 1,

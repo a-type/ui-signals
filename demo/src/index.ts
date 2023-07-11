@@ -7,6 +7,8 @@ import {
   define,
   attr,
   AttrOf,
+  computed,
+  react,
 } from '../../src/index.js';
 
 const app = element('div');
@@ -30,31 +32,28 @@ child(
   `,
 );
 
-const Custom = define(
-  'c-custom',
-  {
-    content: 'Hello world!',
-  },
-  ({ ui, css, attrs }) => {
-    const root = ui(element('div'));
-    child(root, attrs.content);
-    prop(root, 'className', atom('class', 'demo'));
+const Custom = define<{ counter: number }>('c-custom', (props, { ui, css }) => {
+  const root = ui(element('div'));
+  child(
+    root,
+    computed('display', () => `Counter: ${props.counter}`),
+  );
+  prop(root, 'className', atom('class', 'demo'));
 
-    css`
-      .demo {
-        color: blue;
-      }
-    `;
-  },
-);
+  css`
+    .demo {
+      color: blue;
+    }
+  `;
+});
 
-const custom = element(Custom);
+const counter = atom('counter', 0);
+
+const custom = Custom({
+  counter,
+});
 child(body, custom);
 
-const customContent = atom('customContent', 'Hello world 1');
-attr(custom, 'content', customContent);
-
-let i = 1;
 setInterval(() => {
-  customContent.set(`Hello world ${++i}`);
+  counter.update((i) => ++i);
 }, 2000);
